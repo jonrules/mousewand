@@ -12,15 +12,17 @@
 #include <exception>
 
 namespace mousewand {
+
 	class PointerException: std::exception {
 		public:
 			PointerException(const char *message);
 			~PointerException() throw();
 			virtual const char* what() const throw();
 		private:
-			char *message;
+			char *_message;
 	};
-}
+
+} /* namespace mousewand */
 
 
 #endif /* MOUSEWAND_POINTEREXCEPTION_H_ */

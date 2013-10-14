@@ -9,22 +9,24 @@
 #define MOUSEWAND_POINTER_H_
 
 
-#include "PointerException.h"
+#include <PointerException.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 namespace mousewand {
+
 	class Pointer {
 		public:
 			Pointer();
 			~Pointer();
 			void moveTo(int x, int y);
 		private:
-			Display *display;
-			Window rootWindow;
+			Display *_display;
+			Window _rootWindow;
 	};
-}
+
+} /* namespace mousewand */
 
 
 #endif /* MOUSEWAND_POINTER_H_ */

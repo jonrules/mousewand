@@ -5,46 +5,48 @@
  *      Author: Jonathan Baltazar
  */
 
-#include "Pointer.h"
+#include <Pointer.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-using namespace mousewand;
 
-Pointer::Pointer() {
-	this->display = XOpenDisplay(NULL);
-	if (display == NULL) {
-		throw new PointerException("Can't open X-Display");
+namespace mousewand {
+
+	Pointer::Pointer() {
+		this->_display = XOpenDisplay(NULL);
+		if (_display == NULL) {
+			throw new PointerException("Can't open X-Display");
+		}
+		this->_rootWindow = DefaultRootWindow(this->_display);
 	}
-	this->rootWindow = DefaultRootWindow(this->display);
-}
 
-Pointer::~Pointer() {
+	Pointer::~Pointer() {
 
-}
+	}
 
-void Pointer::moveTo(int x, int y) {
-	Window currentWindow, fromroot, tmpwin;
-	XWindowAttributes attr;
-	int screenNumber, tmp, currentX, currentY;
-	unsigned int ret;
+	void Pointer::moveTo(int x, int y) {
+		Window currentWindow, fromroot, tmpwin;
+		XWindowAttributes attr;
+		int screenNumber, tmp, currentX, currentY;
+		unsigned int ret;
 
-	XQueryPointer(
-		this->display,
-		this->rootWindow,
-		&fromroot,
-		&tmpwin,
-		&currentX,
-		&currentY,
-		&tmp,
-		&tmp,
-		&ret
-	);
-	XGetWindowAttributes(this->display, fromroot, &attr);
-	screenNumber = XScreenNumberOfScreen(attr.screen);
-	currentWindow = RootWindow(this->display, screenNumber);
-	XWarpPointer(this->display, None, currentWindow, 0, 0, 0, 0, x, y);
-	XFlush(this->display);
-}
+		XQueryPointer(
+			this->_display,
+			this->_rootWindow,
+			&fromroot,
+			&tmpwin,
+			&currentX,
+			&currentY,
+			&tmp,
+			&tmp,
+			&ret
+		);
+		XGetWindowAttributes(this->_display, fromroot, &attr);
+		screenNumber = XScreenNumberOfScreen(attr.screen);
+		currentWindow = RootWindow(this->_display, screenNumber);
+		XWarpPointer(this->_display, None, currentWindow, 0, 0, 0, 0, x, y);
+		XFlush(this->_display);
+	}
 
+} /* namespace mousewand */
 

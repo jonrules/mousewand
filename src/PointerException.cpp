@@ -5,23 +5,25 @@
  *      Author: Jonathan Baltazar
  */
 
-#include "PointerException.h"
+#include <PointerException.h>
 #include <cstring>
-using namespace mousewand;
 
-PointerException::PointerException(const char *message) {
-	int length = std::strlen(message);
-	this->message = new char[length];
-	std::strcpy(this->message, message);
+namespace mousewand {
+
+	PointerException::PointerException(const char *message) {
+		int length = std::strlen(message);
+		this->_message = new char[length];
+		std::strcpy(this->_message, message);
+	}
+
+	PointerException::~PointerException() throw() {
+		delete[] this->_message;
+	}
+
+	const char* PointerException::what() const throw() {
+		return this->_message;
+	}
+
 }
-
-PointerException::~PointerException() throw() {
-	delete[] this->message;
-}
-
-const char* PointerException::what() const throw() {
-	return this->message;
-}
-
 
 

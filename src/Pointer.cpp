@@ -18,6 +18,7 @@ namespace mousewand {
 			throw new PointerException("Can't open X-Display");
 		}
 		this->_rootWindow = DefaultRootWindow(this->_display);
+		this->_currentWindow = this->_rootWindow;
 	}
 
 	Pointer::~Pointer() {
@@ -25,7 +26,60 @@ namespace mousewand {
 	}
 
 	void Pointer::moveTo(int x, int y) {
-		Window currentWindow, fromroot, tmpwin;
+		XWarpPointer(this->_display, None, PointerWindow, 0, 0, 0, 0, x, y);
+		XFlush(this->_display);
+	}
+
+	void Pointer::buttonDown(int button) {
+		int button1 = Button1;
+		int button2 = Button2;
+		int button3 = Button3;
+		XEvent event;
+		event.type = ButtonPress;
+		event.xbutton.button = button;
+		event.xbutton.same_screen = True;
+		XQueryPointer(
+			this->_display,
+			this->_rootWindow,
+			&event.xbutton.root,
+			&event.xbutton.window,
+			&event.xbutton.x_root,
+			&event.xbutton.y_root,
+			&event.xbutton.x,
+			&event.xbutton.y,
+			&event.xbutton.state
+		);
+		event.xbutton.subwindow = event.xbutton.window;
+
+		XSendEvent(this->_display, PointerWindow, True, 0xfff, &event);
+		XFlush(this->_display);
+	}
+
+	void Pointer::buttonUp(int button) {
+		XEvent event;
+		event.type = ButtonRelease;
+		event.xbutton.button = button;
+		event.xbutton.same_screen = True;
+		XQueryPointer(
+			this->_display,
+			this->_rootWindow,
+			&event.xbutton.root,
+			&event.xbutton.window,
+			&event.xbutton.x_root,
+			&event.xbutton.y_root,
+			&event.xbutton.x,
+			&event.xbutton.y,
+			&event.xbutton.state
+		);
+		event.xbutton.subwindow = event.xbutton.window;
+		event.xbutton.state = 0x100;
+
+		XSendEvent(this->_display, PointerWindow, True, 0xfff, &event);
+		XFlush(this->_display);
+	}
+
+	Window Pointer::_getCurrentWindow() {
+		Window fromroot, tmpwin;
 		XWindowAttributes attr;
 		int screenNumber, tmp, currentX, currentY;
 		unsigned int ret;
@@ -43,9 +97,8 @@ namespace mousewand {
 		);
 		XGetWindowAttributes(this->_display, fromroot, &attr);
 		screenNumber = XScreenNumberOfScreen(attr.screen);
-		currentWindow = RootWindow(this->_display, screenNumber);
-		XWarpPointer(this->_display, None, currentWindow, 0, 0, 0, 0, x, y);
-		XFlush(this->_display);
+		this->_currentWindow = RootWindow(this->_display, screenNumber);
+		return this->_currentWindow;
 	}
 
 } /* namespace mousewand */

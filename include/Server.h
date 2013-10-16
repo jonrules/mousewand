@@ -15,9 +15,12 @@ namespace mousewand {
 
 	class Server {
 		public:
-			static const unsigned char MOUSE_DOWN;
-			static const unsigned char MOUSE_MOVE;
-			static const unsigned char MOUSE_UP;
+			static const char MOUSE_DOWN;
+			static const char MOUSE_MOVE;
+			static const char MOUSE_UP;
+			static const char MSG_OK;
+			static const char MSG_ERROR;
+			static const char ERROR_INVALID_PARAMS;
 			Server();
 			virtual ~Server();
 			void start();

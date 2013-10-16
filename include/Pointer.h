@@ -21,9 +21,13 @@ namespace mousewand {
 			Pointer();
 			~Pointer();
 			void moveTo(int x, int y);
+			void buttonDown(int button);
+			void buttonUp(int button);
 		private:
 			Display *_display;
+			Window _currentWindow;
 			Window _rootWindow;
+			Window _getCurrentWindow();
 	};
 
 } /* namespace mousewand */

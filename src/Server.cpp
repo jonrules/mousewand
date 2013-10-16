@@ -7,6 +7,9 @@
 
 #include <Server.h>
 #include <Pointer.h>
+#include <messages/Headers.h>
+#include <messages/PointerMove.h>
+#include <messages/Response.h>
 #include <cstring>
 #include <iostream>
 #include <stdlib.h>
@@ -18,9 +21,12 @@
 
 namespace mousewand {
 
-	const unsigned char Server::MOUSE_DOWN = 1;
-	const unsigned char Server::MOUSE_MOVE = 2;
-	const unsigned char Server::MOUSE_UP = 3;
+	const char Server::MOUSE_DOWN = 1;
+	const char Server::MOUSE_MOVE = 2;
+	const char Server::MOUSE_UP = 3;
+	const char Server::MSG_OK = 0;
+	const char Server::MSG_ERROR = 1;
+	const char Server::ERROR_INVALID_PARAMS = 1;
 
 	Server::Server() {
 		this->_pointer = new Pointer();
@@ -87,49 +93,61 @@ namespace mousewand {
 	}
 
 	void Server::_acceptClient(int clientSocket) {
-		char headers[2], message[256];
-		int length, argsCount;
-		unsigned char type;
+//		char headers[2], inBuffer[256], outBuffer[2];
+		struct messages::Headers *headers = new messages::Headers;
+		struct messages::PointerMove *pointerMove = new messages::PointerMove;
+		struct messages::Response *response = new messages::Response;
+		int n, messageSize;
+		int headersSize = sizeof(messages::Headers);
+		int responseSize = sizeof(messages::Response);
 
 		while (true) {
 			// Read headers
-			memset(headers, 0, 2);
-			length = read(clientSocket, headers, 2);
-			if (length < 0) {
+			memset(headers, 0, headersSize);
+			n = read(clientSocket, headers, 2);
+			if (n < 2) {
 				this->_clientSocketError(
 					clientSocket,
 					"Error reading client socket"
 				);
 				break;
 			}
-			if (length < 1) {
-				this->_clientSocketError(
-					clientSocket,
-					"Error reading message length"
-				);
-				break;
-			}
-			type = headers[0];
-			argsCount = headers[1];
 
 			// Read message
-			memset(message, 0, 256);
-			switch (type) {
+			memset(response, 0, sizeof(response));
+			switch (headers->type) {
 				case Server::MOUSE_DOWN: {
 					break;
 				}
 
 				case Server::MOUSE_MOVE: {
-					if (argsCount == 2) {
-						length = read(clientSocket, message, 8);
-						int x = this->_readInt(message, 0);
-						int y = this->_readInt(message, 4);
-						this->_pointer->moveTo(x, y);
+					messageSize = sizeof(messages::PointerMove);
+					memset(pointerMove, 0, messageSize);
+					n = read(clientSocket, pointerMove, messageSize);
+					if (n == messageSize) {
+						pointerMove->x = ntohl(pointerMove->x);
+						pointerMove->y = ntohl(pointerMove->y);
+						this->_pointer->moveTo(pointerMove->x, pointerMove->y);
+						response->status = Server::MSG_OK;
+						response->info = 0;
+						n = write(clientSocket, response, responseSize);
+						if (n < 2) {
+							this->_clientSocketError(
+								clientSocket,
+								"Error sending status message"
+							);
+							return;
+						}
 					} else {
-						this->_clientSocketError(
-							clientSocket,
-							"Invalid client MOUSE_MOVE message"
-						);
+						response->status = Server::MSG_ERROR;
+						response->info = Server::ERROR_INVALID_PARAMS;
+						n = write(clientSocket, response, responseSize);
+						if (n < 2) {
+							this->_clientSocketError(
+								clientSocket,
+								"Invalid client MOUSE_MOVE message"
+							);
+						}
 					}
 					break;
 				}

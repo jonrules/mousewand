@@ -10,6 +10,7 @@
 #include <messages/Headers.h>
 #include <messages/PointerMove.h>
 #include <messages/Response.h>
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <stdlib.h>
@@ -93,61 +94,39 @@ namespace mousewand {
 	}
 
 	void Server::_acceptClient(int clientSocket) {
-//		char headers[2], inBuffer[256], outBuffer[2];
-		struct messages::Headers *headers = new messages::Headers;
-		struct messages::PointerMove *pointerMove = new messages::PointerMove;
-		struct messages::Response *response = new messages::Response;
-		int n, messageSize;
-		int headersSize = sizeof(messages::Headers);
-		int responseSize = sizeof(messages::Response);
+		int n = 0;
+		messages::Headers *headers = new messages::Headers;
+		messages::PointerMove *pointerMove = new messages::PointerMove;
+		messages::Response *response = new messages::Response;
 
 		while (true) {
 			// Read headers
-			memset(headers, 0, headersSize);
-			n = read(clientSocket, headers, 2);
-			if (n < 2) {
+			headers->reset();
+			n = headers->readAll(clientSocket);
+			if (n < 1) {
 				this->_clientSocketError(
 					clientSocket,
-					"Error reading client socket"
+					"Error reading message"
 				);
 				break;
 			}
 
 			// Read message
-			memset(response, 0, sizeof(response));
-			switch (headers->type) {
+			switch (headers->getType()) {
 				case Server::MOUSE_DOWN: {
 					break;
 				}
 
 				case Server::MOUSE_MOVE: {
-					messageSize = sizeof(messages::PointerMove);
-					memset(pointerMove, 0, messageSize);
-					n = read(clientSocket, pointerMove, messageSize);
-					if (n == messageSize) {
-						pointerMove->x = ntohl(pointerMove->x);
-						pointerMove->y = ntohl(pointerMove->y);
-						this->_pointer->moveTo(pointerMove->x, pointerMove->y);
-						response->status = Server::MSG_OK;
-						response->info = 0;
-						n = write(clientSocket, response, responseSize);
-						if (n < 2) {
-							this->_clientSocketError(
-								clientSocket,
-								"Error sending status message"
-							);
-							return;
-						}
+					pointerMove->reset();
+					n = pointerMove->readAll(clientSocket);
+					if (n > 0) {
+						response->reset();
+						response->setStatus(0);
+						response->setInfo(0);
+						response->writeAll(clientSocket);
 					} else {
-						response->status = Server::MSG_ERROR;
-						response->info = Server::ERROR_INVALID_PARAMS;
-						n = write(clientSocket, response, responseSize);
-						if (n < 2) {
-							this->_clientSocketError(
-								clientSocket,
-								"Invalid client MOUSE_MOVE message"
-							);
-						}
+
 					}
 					break;
 				}
@@ -161,19 +140,15 @@ namespace mousewand {
 				}
 			}
 		}
+
+		delete headers;
+		delete pointerMove;
+		delete response;
 	}
 
 	void Server::_clientSocketError(int clientSocket, const char *error) {
-		perror("Error reading client socket");
+		perror(error);
 		close(clientSocket);
-	}
-
-	int Server::_readInt(const char *input, int offset) {
-		int value = (input[offset] << 24 & 0xFF000000)
-			| (input[offset+1] << 16 & 0xFF0000)
-			| (input[offset+2] << 8 & 0xFF00)
-			| (input[offset+3] & 0xFF);
-		return value;
 	}
 
 } /* namespace mousewand */

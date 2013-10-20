@@ -1,7 +1,7 @@
 /*
  * Headers.h
  *
- *  Created on: Oct 15, 2013
+ *  Created on: Oct 19, 2013
  *      Author: Jonathan Baltazar
  */
 
@@ -9,17 +9,28 @@
 #define MOUSEWAND_MESSAGES_HEADERS_H_
 
 
+#include <messages/Message.h>
+
 namespace mousewand {
 
 	namespace messages {
 
-		struct Headers {
-			char version, type;
+		class Headers: Message {
+			public:
+				Headers();
+				~Headers();
+				char getType();
+				char getVersion();
+				int readAll(int socket);
+				void reset();
+				int writeAll(int socket);
+			private:
+				char _version, _type;
 		};
 
-	} /* namespace messages */
+	}
 
-} /* namespace mousewand */
+}
 
 
 #endif /* MOUSEWAND_MESSAGES_HEADERS_H_ */

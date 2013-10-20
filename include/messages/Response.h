@@ -1,7 +1,7 @@
 /*
  * Response.h
  *
- *  Created on: Oct 15, 2013
+ *  Created on: Oct 19, 2013
  *      Author: Jonathan Baltazar
  */
 
@@ -9,17 +9,30 @@
 #define MOUSEWAND_MESSAGES_RESPONSE_H_
 
 
+#include <messages/Message.h>
+
 namespace mousewand {
 
 	namespace messages {
 
-		struct Response {
-			char status, info;
+		class Response: Message {
+			public:
+				Response();
+				~Response();
+				char getStatus();
+				void setStatus(char status);
+				char getInfo();
+				void setInfo(char info);
+				int readAll(int socket);
+				void reset();
+				int writeAll(int socket);
+			private:
+				char _status, _info;
 		};
 
-	} /* namespace messages */
+	}
 
-} /* namespace mousewand */
+}
 
 
 #endif /* MOUSEWAND_MESSAGES_RESPONSE_H_ */

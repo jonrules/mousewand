@@ -29,7 +29,6 @@ namespace mousewand {
 			Pointer *_pointer;
 			void _acceptClient(int clientSocket);
 			void _clientSocketError(int clientSocket, const char *error);
-			int _readInt(const char *input, int offset);
 	};
 
 } /* namespace mousewand */

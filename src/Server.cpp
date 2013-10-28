@@ -121,6 +121,7 @@ namespace mousewand {
 					pointerMove->reset();
 					n = pointerMove->readAll(clientSocket);
 					if (n > 0) {
+						this->_pointer->moveTo(pointerMove->getX(), pointerMove->getY());
 						response->reset();
 						response->setStatus(0);
 						response->setInfo(0);

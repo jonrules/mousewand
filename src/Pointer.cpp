@@ -26,7 +26,7 @@ namespace mousewand {
 	}
 
 	void Pointer::moveTo(int x, int y) {
-		XWarpPointer(this->_display, None, PointerWindow, 0, 0, 0, 0, x, y);
+		XWarpPointer(this->_display, None, None, 0, 0, 0, 0, x, y);
 		XFlush(this->_display);
 	}
 

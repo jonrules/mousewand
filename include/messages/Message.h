@@ -15,6 +15,14 @@ namespace mousewand {
 
 		class Message {
 			public:
+				static const char TYPE_POINTER_DOWN = 1;
+				static const char TYPE_POINTER_MOVE = 2;
+				static const char TYPE_POINTER_MOVE_RELATIVE = 3;
+				static const char TYPE_POINTER_UP = 4;
+				static const char STATUS_OK = 0;
+				static const char STATUS_ERROR = 1;
+				static const char ERROR_INVALID_PARAMS = 1;
+
 				Message();
 				virtual ~Message();
 				virtual int readAll(int socket);

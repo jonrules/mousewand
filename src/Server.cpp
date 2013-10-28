@@ -22,13 +22,6 @@
 
 namespace mousewand {
 
-	const char Server::MOUSE_DOWN = 1;
-	const char Server::MOUSE_MOVE = 2;
-	const char Server::MOUSE_UP = 3;
-	const char Server::MSG_OK = 0;
-	const char Server::MSG_ERROR = 1;
-	const char Server::ERROR_INVALID_PARAMS = 1;
-
 	Server::Server() {
 		this->_pointer = new Pointer();
 	}
@@ -113,11 +106,11 @@ namespace mousewand {
 
 			// Read message
 			switch (headers->getType()) {
-				case Server::MOUSE_DOWN: {
+				case messages::Message::TYPE_POINTER_DOWN: {
 					break;
 				}
 
-				case Server::MOUSE_MOVE: {
+				case messages::Message::TYPE_POINTER_MOVE: {
 					pointerMove->reset();
 					n = pointerMove->readAll(clientSocket);
 					if (n > 0) {
@@ -132,7 +125,22 @@ namespace mousewand {
 					break;
 				}
 
-				case Server::MOUSE_UP: {
+				case messages::Message::TYPE_POINTER_MOVE_RELATIVE: {
+					pointerMove->reset();
+					n = pointerMove->readAll(clientSocket);
+					if (n > 0) {
+						this->_pointer->moveRelative(pointerMove->getX(), pointerMove->getY());
+						response->reset();
+						response->setStatus(0);
+						response->setInfo(0);
+						response->writeAll(clientSocket);
+					} else {
+
+					}
+					break;
+				}
+
+				case messages::Message::TYPE_POINTER_UP: {
 					break;
 				}
 

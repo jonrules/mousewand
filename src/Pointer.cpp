@@ -25,11 +25,6 @@ namespace mousewand {
 
 	}
 
-	void Pointer::moveTo(int x, int y) {
-		XWarpPointer(this->_display, None, None, 0, 0, 0, 0, x, y);
-		XFlush(this->_display);
-	}
-
 	void Pointer::buttonDown(int button) {
 		int button1 = Button1;
 		int button2 = Button2;
@@ -75,6 +70,16 @@ namespace mousewand {
 		event.xbutton.state = 0x100;
 
 		XSendEvent(this->_display, PointerWindow, True, 0xfff, &event);
+		XFlush(this->_display);
+	}
+
+	void Pointer::moveRelative(int x, int y) {
+		XWarpPointer(this->_display, None, None, 0, 0, 0, 0, x, y);
+		XFlush(this->_display);
+	}
+
+	void Pointer::moveTo(int x, int y) {
+		XWarpPointer(this->_display, None, this->_getCurrentWindow(), 0, 0, 0, 0, x, y);
 		XFlush(this->_display);
 	}
 

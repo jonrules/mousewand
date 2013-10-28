@@ -20,6 +20,7 @@ namespace mousewand {
 		public:
 			Pointer();
 			~Pointer();
+			void moveRelative(int x, int y);
 			void moveTo(int x, int y);
 			void buttonDown(int button);
 			void buttonUp(int button);

@@ -8,7 +8,9 @@
 #include <Server.h>
 #include <Pointer.h>
 #include <messages/Headers.h>
+#include <messages/PointerDown.h>
 #include <messages/PointerMove.h>
+#include <messages/PointerUp.h>
 #include <messages/Response.h>
 #include <algorithm>
 #include <cstring>
@@ -89,7 +91,9 @@ namespace mousewand {
 	void Server::_acceptClient(int clientSocket) {
 		int n = 0;
 		messages::Headers *headers = new messages::Headers;
+		messages::PointerDown *pointerDown = new messages::PointerDown;
 		messages::PointerMove *pointerMove = new messages::PointerMove;
+		messages::PointerUp *pointerUp = new messages::PointerUp;
 		messages::Response *response = new messages::Response;
 
 		while (true) {
@@ -107,13 +111,24 @@ namespace mousewand {
 			// Read message
 			switch (headers->getType()) {
 				case messages::Message::TYPE_POINTER_DOWN: {
+					pointerDown->reset();
+					n = pointerDown->readAll(clientSocket);
+					if (n > -1) {
+						this->_pointer->buttonDown(pointerDown->getButton());
+						response->reset();
+						response->setStatus(0);
+						response->setInfo(0);
+						response->writeAll(clientSocket);
+					} else {
+
+					}
 					break;
 				}
 
 				case messages::Message::TYPE_POINTER_MOVE: {
 					pointerMove->reset();
 					n = pointerMove->readAll(clientSocket);
-					if (n > 0) {
+					if (n > -1) {
 						this->_pointer->moveTo(pointerMove->getX(), pointerMove->getY());
 						response->reset();
 						response->setStatus(0);
@@ -128,7 +143,7 @@ namespace mousewand {
 				case messages::Message::TYPE_POINTER_MOVE_RELATIVE: {
 					pointerMove->reset();
 					n = pointerMove->readAll(clientSocket);
-					if (n > 0) {
+					if (n > -1) {
 						this->_pointer->moveRelative(pointerMove->getX(), pointerMove->getY());
 						response->reset();
 						response->setStatus(0);
@@ -141,6 +156,17 @@ namespace mousewand {
 				}
 
 				case messages::Message::TYPE_POINTER_UP: {
+					pointerUp->reset();
+					n = pointerUp->readAll(clientSocket);
+					if (n > -1) {
+						this->_pointer->buttonUp(pointerDown->getButton());
+						response->reset();
+						response->setStatus(0);
+						response->setInfo(0);
+						response->writeAll(clientSocket);
+					} else {
+
+					}
 					break;
 				}
 
@@ -151,7 +177,9 @@ namespace mousewand {
 		}
 
 		delete headers;
+		delete pointerDown;
 		delete pointerMove;
+		delete pointerUp;
 		delete response;
 	}
 

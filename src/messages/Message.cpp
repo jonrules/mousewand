@@ -27,20 +27,12 @@ namespace mousewand {
 			return n;
 		}
 
-		int Message::readAll(int socket) {
-			return 0;
-		}
-
 		int Message::readInt(int socket, void *data) {
 			int buffer = 0;
 			int n = read(socket, &buffer, 4);
 			buffer = ntohl(buffer);
 			memcpy(data, &buffer, 4);
 			return n;
-		}
-
-		void Message::reset() {
-
 		}
 
 		int Message::writeByte(int socket, const void *data) {
@@ -56,9 +48,6 @@ namespace mousewand {
 			return n;
 		}
 
-		int Message::writeAll(int socket) {
-			return 0;
-		}
 	}
 
 }

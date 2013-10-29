@@ -25,11 +25,11 @@ namespace mousewand {
 
 				Message();
 				virtual ~Message();
-				virtual int readAll(int socket);
+				virtual int readAll(int socket) = 0;
 				int readByte(int socket, void *data);
 				int readInt(int socket, void *data);
-				virtual void reset();
-				virtual int writeAll(int socket);
+				virtual void reset() = 0;
+				virtual int writeAll(int socket) = 0;
 				int writeByte(int socket, const void *data);
 				int writeInt(int socket, const void *data);
 		};
